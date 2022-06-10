@@ -1,0 +1,178 @@
+
+        IntUnaryOperator operation;
+        switch (charType) {
+            case LETTER:
+            case DOLLAR:
+            case UNDERLINE:
+                operation = type -> {
+                    if (type != LETTER && type != DIGIT && type != DOLLAR && type != UNDERLINE) {
+                        if (isReservedWord(currentWord.toString())) {
+                            print("保留字");
+                            return RESERVED_WORD_TYPE;
+                        }
+                        print("标识符");
+                        return NAME_TYPE;
+                    }
+                    currentWord.append(nextChar);
+                    return -1;
+                };
+                break;
+            case DIGIT:
+                operation = type -> {
+                    if (type != DIGIT && type != DOT) {
+                        print("数字");
+                        return NUMBER_TYPE;
+                    }
+                    currentWord.append(nextChar);
+                    return -1;
+                };
+                break;
+            case ASSIGNMENT:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT },
+                        new String[] { "判断相等运算符" },
+                        "赋值运算符");
+                break;
+            case ADDITION:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, ADDITION },
+                        new String[] { "加且赋值运算符", "自增运算符" },
+                        "加法运算符");
+                break;
+            case SUBTRACTION:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, SUBTRACTION },
+                        new String[] { "减且赋值运算符", "自减运算符" },
+                        "减法运算符");
+                break;
+            case MULTIPLICATION:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, DIVISION },
+                        new String[] { "乘且赋值运算符", "多行注释结束" },
+                        "乘法运算符");
+                break;
+            case DIVISION:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, DIVISION, MULTIPLICATION },
+                        new String[] { "除且赋值运算符", "单行注释", "多行注释开始" },
+                        "除法运算符");
+                break;
+            case MODULO:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT },
+                        new String[] { "取模且赋值运算符" },
+                        "取模运算符");
+                break;
+            case NOT:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT },
+                        new String[] { "判断不相等运算符" },
+                        "逻辑非运算符");
+                break;
+            case LESS:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, LESS },
+                        new String[] { "判断不大于运算符", "左移运算符" },
+                        "判断小于运算符");
+                break;
+            case GREATER:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, GREATER },
+                        new String[] { "判断不小于运算符", "右移运算符" },
+                        "判断大于运算符");
+                break;
+            case AND:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, AND },
+                        new String[] { "按位与且赋值运算符", "逻辑与运算符" },
+                        "按位与运算符");
+                break;
+            case OR:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT, OR },
+                        new String[] { "按位或且赋值运算符", "逻辑或运算符" },
+                        "按位或运算符");
+                break;
+            case XOR:
+                operation = type -> signOperate(
+                        type,
+                        new int[] { ASSIGNMENT },
+                        new String[] { "异或且赋值运算符" },
+                        "异或运算符");
+                break;
+            case INVERSION:
+                operation = type -> signOperate(
+                        type,
+                        new int[] {},
+                        new String[] {},
+                        "取反运算符");
+                break;
+            case TERNARY_FIRST:
+                operation = type -> {
+                    matchSign(TERNARY_SECOND, "三元运算符", "?:");
+                    return TERNARY_FIRST;
+                };
+                break;
+            case TERNARY_SECOND:
+                operation = type -> TERNARY_SECOND;
+                break;
+            case PARENTHESIS_LEFT:
+                operation = type -> {
+                    matchSign(PARENTHESIS_RIGHT, "括号运算符", "()");
+                    return PARENTHESIS_LEFT;
+                };
+                break;
+            case PARENTHESIS_RIGHT:
+                operation = type -> PARENTHESIS_RIGHT;
+                break;
+            case BRACKET_LEFT:
+                operation = type -> {
+                    matchSign(BRACKET_RIGHT, "下标运算符", "[]");
+                    return BRACKET_LEFT;
+                };
+                break;
+            case BRACKET_RIGHT:
+                operation = type -> BRACKET_RIGHT;
+                break;
+            case BRACE_LEFT:
+                operation = type -> {
+                    matchSign(BRACE_RIGHT, "代码块运算符", "{}");
+                    return BRACE_LEFT;
+                };
+                break;
+            case BRACE_RIGHT:
+                operation = type -> BRACE_RIGHT;
+                break;
+            case COMMA:
+                operation = type -> signOperate(
+                        type,
+                        new int[] {},
+                        new String[] {},
+                        "逗号运算符");
+                break;
+            case SEMICOLON:
+                operation = type -> signOperate(
+                        type,
+                        new int[] {},
+                        new String[] {},
+                        "分号运算符");
+                break;
+            case HASH:
+                operation = type -> 0;
+                break;
+            default:
+                operation = type -> 0;
+                break;
+        }
+        return operate(operation);
