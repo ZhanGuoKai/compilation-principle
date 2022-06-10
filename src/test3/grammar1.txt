@@ -1,0 +1,8 @@
+E -> TE'
+T -> FT'
+F -> (E)
+T' -> *FT'
+F -> i
+T' -> epsilon
+E' -> +TE'
+E' -> epsilon
